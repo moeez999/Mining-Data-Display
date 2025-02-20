@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Submit Miner Hashrate</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h2 {
+        text-align: center;
+        color: #333;
+      }
+
+      input {
+        width: -webkit-fill-available;
+        padding: 10px;
+        margin-top: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+      }
+
+      button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      #errorMessage {
+        text-align: center;
+        margin-top: 20px;
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Enter Wallet Address</h2>
+      <input type="text" id="userInput" placeholder="Enter wallet address..." />
+      <button onclick="submitData()">Submit</button>
+
+      <table id="responseTable" style="display: none">
+        <tr>
+          <th>Address</th>
+          <td id="address"></td>
+        </tr>
+        <tr>
+          <th>Total Hashrate</th>
+          <td id="totalHashrate"></td>
+        </tr>
+        <tr>
+          <th>24h Hashrate</th>
+          <td id="totalHashrate24h"></td>
+        </tr>
+        <tr>
+          <th>Online Miners</th>
+          <td id="totalOnline"></td>
+        </tr>
+      </table>
+
+      <p id="errorMessage"></p>
+    </div>
+
+    <script>
+      function submitData() {
+        const userText = document.getElementById("userInput").value.trim();
+
+        if (!userText) {
+          document.getElementById("errorMessage").textContent =
+            "Please enter a wallet address.";
+          return;
+        }
+
+        const requestData = {
+          jsonrpc: "2.0",
+          method: "xdag_minerHashrate",
+          params: [userText],
+          id: 1,
+        };
+
+        fetch("http://localhost:5000/api/hashrate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestData),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.result) {
+              document.getElementById("responseTable").style.display = "table";
+              document.getElementById("address").textContent =
+                data.result.address;
+              document.getElementById("totalHashrate").textContent =
+                data.result.total_hashrate.toFixed(2);
+              document.getElementById("totalHashrate24h").textContent =
+                data.result.total_hashrate24h.toFixed(2);
+              document.getElementById("totalOnline").textContent =
+                data.result.total_online;
+              document.getElementById("errorMessage").textContent = "";
+            } else {
+              document.getElementById("errorMessage").textContent =
+                "Invalid response from server.";
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            document.getElementById("errorMessage").textContent =
+              "Error occurred while fetching data.";
+          });
+      }
+    </script>
+  </body>
+</html>
