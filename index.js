@@ -13,13 +13,9 @@ app.use(bodyParser.json()); // Parses JSON request bodies
 // Proxy route
 app.post("/api/hashrate", async (req, res) => {
   try {
-    const response = await axios.post(
-      "http://www.xdagreef.org:8082/api",
-      req.body,
-      {
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    const response = await axios.post("http://www.xdagreef.org/api", req.body, {
+      headers: { "Content-Type": "application/json" },
+    });
     res.json(response.data);
   } catch (error) {
     console.error("Error:", error.message);
